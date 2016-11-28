@@ -1,2 +1,3 @@
 Директно програмиране на ESP8266 през Arduino IDE https://github.com/esp8266/Arduino#installing-with-boards-manager
 ESP8266 + Arduino Nano https://blogs.msdn.microsoft.com/abhinaba/2016/01/23/esp8266-wifi-with-arduino-uno-and-nano/
+Директна комуникация PHP-Ардуино http://www.brainboxes.com/faq/items/how-do-i-control-a-serial-port-using-php
