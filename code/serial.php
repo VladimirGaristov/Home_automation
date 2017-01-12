@@ -1,9 +1,12 @@
 <?php
-$ser_port_opt=array('baud'=>9600, 'bits'=>8, 'stop'=>1, 'parity'=>0);
-$arduino=dio_open('/dev/ttyACM0', O_RDWR);
-dio_tcsetattr($arduino, $ser_port_opt);
-dio_write($arduino, 'Q');
-usleep(10000);
-echo dio_read($arduino, 10);
+
+require_once('functions.php');
+set_time_limit(0);
+
+$arduino=serial_init(S_PORT_NAME);
+
+cancur($arduino);
+
 dio_close($arduino);
+
 ?>

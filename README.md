@@ -3,3 +3,4 @@
 
 #Използвани библиотеки:
 https://github.com/todbot/arduino-serial
+http://pecl.php.net/package/dio
