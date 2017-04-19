@@ -15,11 +15,12 @@ if($db->connect_errno)
 	exit('Failed to connect to MySQL: ('.$db->connect_errno.') '.$db->connect_error);
 
 $a=new Comm_protocol_action();
-$a->command='###192.168.1.4;I;karpuz;###';
+$a->command='###192.168.1.5;D;stablo@NG;###';
 
-if($a->verify()===0)	//Това ще е в цикъл.
+if($a->verify_command()===0)	//Това ще е в цикъл.
 {
 	$a->get_IP();
+	$a->get_module_name();
 	$a->type=$a->command_type();
 	if($a->type===1)
 		$a->error(4);
