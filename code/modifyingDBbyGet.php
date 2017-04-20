@@ -1,5 +1,5 @@
 //prototype code
-//need to check for query string validity
+//Added security check for sql injection
 //needs to be tested
 
 <?php
