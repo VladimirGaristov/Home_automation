@@ -21,18 +21,20 @@
 
        public function writing_to_DB() {
           if ($small_lamp) {
-              $db->query("INSERT INTO `small_lamp_p` VALUES (".$small_lamp.");");
+              $db->query("INSERT INTO `".DB_NAME."` (`small_lamp`) VALUES (".$small_lamp.");");
           }
           if ($pechka) {
-              $db->query("INSERT INTO `pechka` VALUES (".$pechka.");");
+              $db->query("INSERT INTO `".DB_NAME."` (`pechka`) VALUES (".$pechka.");");
           }
           if ($big_lamp) {
-              $db->query("INSERT INTO `big_lamp` VALUES (".$big_lamp.");");
+              $db->query("INSERT INTO `".DB_NAME."` (`big_lamp`) VALUES (".$big_lamp.");");
           }
           if ($_password) {
-              $db->query("INSERT INTO `password` VALUES (".$_password.");");
+              $db->query("INSERT INTO `".DB_NAME."` (`password`) VALUES (".$_password.");");
           }
        }
 
    }
+
+   mysql_close($db);
  ?>
