@@ -9,7 +9,7 @@ const DB_USERNAME = 'kompir';
 const DB_PASS = 'chumbedrum420';
 const DB_NAME = 'home_automation';
 const VALID_NAME = '([a-zA-Z][a-zA-Z0-9]*)';
-const VALID_PERMISSIONS = '([RWN(RW)])';
+const VALID_PERMISSIONS = '([RWN(RW)])'; //така /(RW|[RWN])/s ще намери тези букви, но дори когато са в дума
 
 class Comm_protocol_action
 {
