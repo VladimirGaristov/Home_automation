@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>
+			Welcome!
+		</title>
+		<style>
+			body {
+				background-color:black;
+				color:#1ea503;
+                font-size: 18px;
+			}
+			h1 {
+            	color:#1ec503;
+                text-align:center;
+            }
+			.logininfoout {
+            	background-color:cyan;
+                color:black;
+            	float:center;
+            	text-align:center;
+                width:300px;
+                padding-left:25px;
+                padding-bottom:25px;
+                padding-right:25px;
+                padding-top:15px;
+                margin: auto;
+                border: 3px groove darkviolet;
+            }
+            .logininfo {
+            	border: 1px solid red;
+                padding: 35px 0px;
+            }
+            .contents {
+				float:center;
+            	text-align:left;
+                margin:auto;
+				border: 3px ridge darkviolet;
+				width:200px;
+				padding-left:25px;
+			}
+			.field{
+			width:50px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Welcome!</h1>
+		<form action="modifingDBbyGet.php", method="post">
+			<div class="logininfoout">
+				<div class="logininfo">
+					Password:
+					<input type="password", name="password", value="">
+					<br><br>
+					<input type="submit", value="Submit">
+				</div>
+			</div>
+			<br><br>
+			<div class="contents">
+				<br>
+				<select>
+					<option name="-">-</option>
+					<option name="1">On</option>
+					<option name="0">Off</option>
+				</select> - Big Lamp
+				<br><br>
+				<input class="field", type="text", name="small_lamp_p" value=""> % - Small Lamp
+				<br><br>
+				<input class="field", type="text", name="pechka_p" value=""> % - Pechka
+				<br><br>
+			</div>
+        </form>
+	</body>
+</html>
