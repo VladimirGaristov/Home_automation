@@ -8,7 +8,7 @@
    define('DB_USERNAME', 'kompir');
    define('DB_PASSWORD', 'chumbedrum420');
    define('DB_NAME', 'home_automation');
-   define('PASSWORD', 'Apple');
+   define('PASSWORD', 'Apple'); // static password , needs! to be changed 
    $db = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
    if (mysqli_connect_errno()) {
@@ -21,13 +21,13 @@
    $_password = mysqli_real_escape_string($db, $_POST['password']);
 
    if ($_password == PASSWORD) {
-       if ($small_lamp) {
+       if ($small_lamp != '-') {
            $db->query("UPDATE `small_lamp` SET `on` = ".$small_lamp.";");
        }
-       if ($pechka) {
+       if ($pechka != '-') {
            $db->query("UPDATE `pechka` SET `power` = ".$pechka.";");
        }
-       if ($big_lamp) {
+       if ($big_lamp != '-') {
            $db->query("UPDATE `big_lamp` SET `big_lamp` = ".$big_lamp.";");
        }
    }
