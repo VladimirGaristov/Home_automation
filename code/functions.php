@@ -2,14 +2,14 @@
 
 const S_PORT_NAME = '/dev/ttyACM0';
 const BAUD_RATE = 9600;
-const READ_REQUEST = '?';
+const READ_REQUEST = '?\0';
 const DELAY = 50000;
 const DB_SERVER = 'localhost';
 const DB_USERNAME = 'kompir';
 const DB_PASS = 'chumbedrum420';
 const DB_NAME = 'home_automation';
 const VALID_NAME = '([a-zA-Z][a-zA-Z0-9]*)';
-const VALID_PERMISSIONS = '([RWN(RW)])'; //така /(RW|[RWN])/s ще намери тези букви, но дори когато са в дума
+const VALID_PERMISSIONS = '([RWN(RW)])';
 
 class Comm_protocol_action
 {
@@ -44,7 +44,7 @@ class Comm_protocol_action
 		$this->type=$t;
 	}
 
-	function new_module()
+	function new_module()	//да няма модули с еднакви адреси!
 	{
 		global $db;
 		$new_module_name=$this->get_param();
@@ -297,9 +297,9 @@ class Comm_protocol_action
 		global $db;
 		$this->command=$db->real_escape_string($this->command);
 		if(strcmp(substr($this->command, 0, 3), substr($this->command, -3))==0)
-			return 0;
-		else
 			return 1;
+		else
+			return 0;
 	}
 
 	function get_IP()
@@ -341,8 +341,8 @@ class Serial
 
 	function write(&$input)
 	{
+		dio_write($this->conn, $input.'\0', strlen($input));
 		usleep(DELAY);
-		dio_write($this->conn, $input, strlen($input));
 	}
 
 	function cancur()
