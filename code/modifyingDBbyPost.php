@@ -22,13 +22,13 @@
 
    if ($_password == PASSWORD) {
        if ($small_lamp != '-') {
-           $db->query("UPDATE `small_lamp` SET `on` = ".$small_lamp.";");
+           $db->query("UPDATE `small_lamp` SET `power` = ".$small_lamp.";");
        }
        if ($pechka != '-') {
-           $db->query("UPDATE `pechka` SET `power` = ".$pechka.";");
+           $db->query("UPDATE `pechka` SET `on` = ".$pechka.";");
        }
        if ($big_lamp != '-') {
-           $db->query("UPDATE `big_lamp` SET `big_lamp` = ".$big_lamp.";");
+           $db->query("UPDATE `big_lamp` SET `on` = ".$big_lamp.";");
        }
    }
 
