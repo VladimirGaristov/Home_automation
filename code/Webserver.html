@@ -6,8 +6,7 @@
 		</title>
 		<style>
 			body {
-				background-color:black;
-				color:#1ea503;
+				color:#0e6503;
                 		font-size: 18px;
 			}
 			h1 {
@@ -16,7 +15,7 @@
            		}
 			.logininfoout {
             			background-color:cyan;
-                		color:black;
+                		color:red;
             			float:center;
             			text-align:center;
                 		width:300px;
@@ -25,13 +24,15 @@
                 		padding-right:25px;
                 		padding-top:15px;
                 		margin: auto;
-                		border: 3px groove darkviolet;
+                		border: 3px ridge darkviolet;
             		}
            		 .logininfo {
-            			border: 1px solid red;
+				background-color:lightblue;
+            			border: 1px solid gray;
                 		padding: 35px 0px;
             		}
             		.contents {
+				background-color:lightgray;
 				float:center;
             			text-align:left;
                 		margin:auto;
@@ -40,13 +41,13 @@
 				padding-left:25px;
 			}
 			.field{
-			width:50px;
+			width:40px;
 			}
 		</style>
 	</head>
 	<body>
 		<h1>Welcome!</h1>
-		<form action="modifingDBbyPost.php", method="post">
+		<form action="modifyingDBbyPost.php", method="post">
 			<div class="logininfoout">
 				<div class="logininfo">
 					Password:
@@ -58,13 +59,13 @@
 			<br><br>
 			<div class="contents">
 				<br>
+				<input class="field", type="text", name="small_lamp_p" value=""> % - Small Lamp
+				<br><br>
 				<select>
 					<option name="-">-</option>
 					<option name="1">On</option>
 					<option name="0">Off</option>
 				</select> - Big Lamp
-				<br><br>
-				<input class="field", type="text", name="small_lamp_p" value=""> % - Small Lamp
 				<br><br>
 				<select>
 					<option name="-">-</option>
