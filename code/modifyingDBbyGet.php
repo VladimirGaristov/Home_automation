@@ -15,10 +15,10 @@
       echo "Failed to connect to MySQL: " . mysqli_connect_error();
    }
 
-   $small_lamp = mysqli_real_escape_string($db, $_GET['small_lamp_p']);
-   $pechka = mysqli_real_escape_string($db, $_GET['pechka']);
-   $big_lamp = mysqli_real_escape_string($db, $_GET['big_lamp']);
-   $_password = mysqli_real_escape_string($db, $_GET['password']);
+   $small_lamp = mysqli_real_escape_string($db, $_POST['small_lamp_p']);
+   $pechka = mysqli_real_escape_string($db, $_POST['pechka']);
+   $big_lamp = mysqli_real_escape_string($db, $_POST['big_lamp']);
+   $_password = mysqli_real_escape_string($db, $_POST['password']);
 
    if ($_password == PASSWORD) {
        if ($small_lamp) {
