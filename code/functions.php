@@ -4,11 +4,12 @@ const S_PORT_NAME = '/dev/ttyACM0';
 const BAUD_RATE = 9600;
 const READ_REQUEST = '?';
 const DELAY = 50000;
+const DB_SERVER = 'localhost';
 const DB_USERNAME = 'kompir';
 const DB_PASS = 'chumbedrum420';
 const DB_NAME = 'home_automation';
 const VALID_NAME = '([a-zA-Z][a-zA-Z0-9]*)';
-const VALID_PERMISSIONS = '([RWN]|RW)';
+const VALID_PERMISSIONS = '([RWN(RW)])';
 
 class Comm_protocol_action
 {
@@ -23,23 +24,24 @@ class Comm_protocol_action
 		switch($this->get_param())
 		{
 			case 'H':
-				return 'send_IP';
+				$t='send_IP';
 				break;
 			case 'I':
-				return 'new_module';
+				$t='new_module';
 				break;
 			case 'D':
-				return 'var_define';
+				$t='var_define';
 				break;
 			case 'W':
-				return 'db_write';
+				$t='db_write';
 				break;
 			case 'R':
-				return 'db_read';
+				$t='db_read';
 				break;
 			default:
-				return 1;
+				$t=FALSE;
 		}
+		$this->type=$t;
 	}
 
 	function new_module()
@@ -83,12 +85,47 @@ class Comm_protocol_action
 	function db_read()
 	{
 		global $db;
+		$var_name;
+		$owner;
+		$permissions;
+		$own;
+		$read_req=$this->get_param();
+		if($read_req===-1)
+			$this->error(10);
+		else
+		{
+			$this->reply='###'.$this->IP.';A;';
+			do
+			{
+				$own=0;
+				if(!$this->verify_read($read_req, $var_name, $owner, $own))
+				{
+					$reply=$db->query('SELECT value, permissions FROM '.$owner." WHERE variable_name='".$var_name."';");
+					if($reply->num_rows==0)
+						$this->error(6);
+					else
+					{
+						$value=$reply->fetch_assoc();
+						if($own || strpos($value['permissions'], 'R'))
+						{
+							$this->reply.=$value['value'];
+						}
+						else
+							$this->error(3);
+					}
+				}
+				$this->reply.=';';
+				$read_req=$this->get_param();
+			}
+			while(!($read_req===-1));
+			$this->reply.='###';
+		}
 	}
 
 	function var_define()
 	{
 		global $db;
-		$new_variable_name;
+		$new_var_name;
 		$permissions;
 		$declaration=$this->get_param();
 		if($declaration===-1)
@@ -98,9 +135,9 @@ class Comm_protocol_action
 			$this->reply='###'.$this->IP.';A;';
 			do
 			{
-				if(!$this->verify_declaration($declaration, $new_variable_name, $permissions))
+				if(!$this->verify_declaration($declaration, $new_var_name, $permissions))
 				{
-					$db->query('INSERT INTO '.$this->module." (variable_name, permissions) VALUES ('".$new_variable_name."', '".$permissions."');");
+					$db->query('INSERT INTO '.$this->module." (variable_name, permissions) VALUES ('".$new_var_name."', '".$permissions."');");
 					$this->reply.='Valid;';
 				}
 				else
@@ -112,7 +149,7 @@ class Comm_protocol_action
 		}
 	}
 
-	function verify_declaration(&$declaration, &$new_variable_name, &$permissions)
+	function verify_declaration(&$declaration, &$new_var_name, &$permissions)
 	{
 		global $db;
 		$separator_position=strpos($declaration, '@');
@@ -121,14 +158,14 @@ class Comm_protocol_action
 			$this->error(2);
 			return -2;
 		}
-		$new_variable_name=substr($declaration, 0, $separator_position);
+		$new_var_name=substr($declaration, 0, $separator_position);
 		$permissions=substr($declaration, $separator_position+1);
 		if(preg_match(VALID_PERMISSIONS, $permissions)==0)
 		{
 			$this->error(9);
 			return -9;
 		}
-		if(preg_match(VALID_NAME, $new_variable_name)==0 || strlen($new_variable_name)>255)
+		if(preg_match(VALID_NAME, $new_var_name)==0 || strlen($new_var_name)>255)
 		{
 			$this->error(11);
 			return -11;
@@ -138,11 +175,40 @@ class Comm_protocol_action
 			$this->error(14);
 			return -14;
 		}
-		$variables_with_this_name=$db->query("SELECT * FROM ".$this->module." WHERE variable_name='".$new_variable_name."';");
-		if($variables_with_this_name->num_rows!=0)
+		$variables_with_this_name=$db->query('SELECT id FROM '.$this->module." WHERE variable_name='".$new_var_name."';");
+		if($variables_with_this_name->num_rows)
 		{
 			$this->error(8);
 			return -8;
+		}
+		return 0;
+	}
+
+	function verify_read(&$read_req, &$var_name, &$owner, &$own)
+	{
+		global $db;
+		$separator_position=strpos($read_req, '.');
+		if($separator_position===FALSE)
+		{
+			$var_name=$read_req;
+			$owner=$this->module;
+			$own=1;
+			if(!isset($this->module))
+			{
+				$this->error(14);
+				return -14;
+			}
+		}
+		else
+		{
+			$owner=substr($read_req, 0, $separator_position);
+			$var_name=substr($read_req, $separator_position+1);
+			$modules_with_this_name=$db->query("SELECT id FROM modules WHERE name='".$owner."';");
+			if(!$modules_with_this_name->num_rows)
+			{
+				$this->error(5);
+				return -5;
+			}
 		}
 		return 0;
 	}
