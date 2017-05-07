@@ -11,11 +11,17 @@ char incomingPacket[511];  // buffer for incoming packets
 char  replyPacket[] = "Hi there! Got the message :-)";  // a reply string to send back
 char command[511];
 char *separator;
-char *address;
+char address[511];
 char s[511];
+//int j=0;
+int i, l;
+char lenght[4];
+char fuckdis[5]="###";
+char zadaraboti[40]="1234567891234567891234567asdfgtrdsh8912";
 
 void setup()
 {
+  //fuckdis[4]='\0';
   Serial.begin(9600);
   Serial.println();
   Serial.printf("Connecting to %s ", ssid);
@@ -30,91 +36,101 @@ void setup()
 
   Udp.begin(localUdpPort);
   Serial.printf("Now listening at IP %s, UDP port %d\n", WiFi.localIP().toString().c_str(), localUdpPort);
+  
 }
 
 
 void loop()
 {
-  int l, i;
+  /*if (Serial.available() > 0)
+  {
+    i=Serial.readBytesUntil('\0', replyPacket, 1038);
+    replyPacket[i]='\0';
+    if (!(strcmp(replyPacket, "?")))
+      {
+        Serial.print("0026");
+        Serial.print("###192.168.95.");
+        Serial.print(j);
+        Serial.print(";I;duy");
+        Serial.print(j);
+        Serial.print(";###");
+        j++;
+      }
+  }*/
   int packetSize = Udp.parsePacket();
   byte ip[4];
   char* convert;
   if (Serial.available() > 0)
   {
-    Serial.readBytesUntil('\0', replyPacket, 1038);
+    i=Serial.readBytesUntil('\0', replyPacket, 510);
+    replyPacket[i]='\0';
     if (!(strcmp(replyPacket, "?")))
     {
       l = strlen(command);
-      Serial.println(l);
+      //Serial.println(l);
       if (l)
       {
-        Serial.println(command);
+        for(i=0;i<4;i++)
+        {
+          lenght[3-i]=l%10+48;
+          l/=10;
+        }
+        Serial.print(lenght);
+        Serial.print(command);
         command[0] = '\0';
       }
     }
     else
     {
+      //Serial.println(replyPacket);
+      l=strlen(replyPacket);
+      s[0]='\0';
       strcpy(s, replyPacket);
+      s[l]='\0';
       char * cr_parse;
       cr_parse = strtok(replyPacket, "#;");
-      Serial.println("THIS IS THE START");
-      while (cr_parse != NULL) {
-        Serial.println(cr_parse);
-        if(cr_parse[0] == '1') {
-          address = cr_parse; 
-          Serial.println(cr_parse);
-          break;
-        }
-        cr_parse = strtok (NULL, " ,.-");
-        Serial.println("END PARSE");
-        Serial.println(cr_parse);
+      if (cr_parse != NULL)
+      {
+        strcpy(address, cr_parse);
       }
-      cr_parse = s+strlen(cr_parse)+1;
-      cr_parse=strcat("###", cr_parse);
-      strcpy(replyPacket, cr_parse);
+      cr_parse = s+strlen(cr_parse)+4;
+      l=strlen(cr_parse);
+      convert=NULL;
+      convert=strcat(fuckdis, cr_parse);
+      //Serial.println(address);
       parseBytes(address, '.', ip, 4, 10);
-      Serial.println(replyPacket);
-      Udp.beginPacket(ip, localUdpPort);
-      Udp.write(replyPacket);
+      strcpy(s, zadaraboti);
+      strcpy(s, convert);
+      s[l+3]='\0';
+      //Serial.println(s);
+      //Serial.println(strlen(s));
+      //Serial.println(ip);
+      Udp.beginPacket(ip, 20300);
+      Udp.write(s, strlen(s));
       Udp.endPacket();
-      command[0] = '\0';
+      //Serial.println("TEST0");
+      s[0]='\0';
+      replyPacket[0]='\0';
+      convert[3]='\0';
     }
-    //address[0] = '\0';
   }
-  // receive incoming UDP packets
-  //Serial.printf("Received %d bytes from %s, port %d\n", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort());
   int len = Udp.read(incomingPacket, 511);
   if (len > 0)
-  {
-    Serial.println("DEBAMAMIKAMU");
+  {/*
     incomingPacket[len] = '\0';
-    strcpy(s, Udp.remoteIP().toString().c_str());
-    l=strlen(s);
-    convert = strcat("###", s);
-    strcpy(s, convert);
-    s[l+3]='\0';
-    Serial.println("S:");
-    Serial.println(s);
-    strcpy(command, s);
-    Serial.println("1st Commmand state:");
-    Serial.println(command);
+    strcpy(command, Udp.remoteIP().toString().c_str());
+    l=strlen(command);
+    convert = strcat("###", command); //strcat или strcpy не слагат нулев байт в края на низа
+    strcpy(command, convert);
+    command[l+3]='\0';
     convert = strcat(command, ";");
     strcpy(command, convert);
-    Serial.println("2nd Commmand state:");
-    Serial.println(command);
     convert = strcat(command, incomingPacket + 3);
     strcpy(command, convert);
-    Serial.println("Final state:");
-    Serial.println(command);
-
+    //Serial.println(command);
+    */
+    strcpy(command, "###192.168.97.4;R;small_lamp.state;small_lamp.power;big_lamp.on;pechka.on;### ");
   }
-  //Serial.printf("UDP packet contents: %s\n", incomingPacket);
-  // send back a reply, to the IP address and port we got the packet from
-
-  /*Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
-    Udp.write(replyPacekt);
-    Udp.endPacket();*/
-  //address[0] = '\0';
 }
 
 void parseBytes(const char* str, char sep, byte* bytes, int maxBytes, int base) {
