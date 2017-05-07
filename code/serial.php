@@ -4,9 +4,7 @@ require_once('functions.php');
 set_time_limit(0);
 
 $arduino=new Serial();
-$arduino->init(PORT_NAME);
-$arduino->cancur();
-$arduino->end();
+$arduino->init(S_PORT_NAME);
 
 $db=new mysqli(DB_SERVER, DB_USERNAME, DB_PASS, DB_NAME);
 if($db->connect_errno)
@@ -14,11 +12,15 @@ if($db->connect_errno)
 
 $a=new Comm_protocol_action();
 
+$attemps=3;
+
 while(1)
 {
+	$attemps--;
 	$l=$arduino->read($a->command);
 	usleep(DELAY);
-	echo $a->command;
+	if($attemps==0)
+		exit(-1);
 	if($l==-1)
 		continue;
 	if($a->verify_command())
@@ -26,6 +28,7 @@ while(1)
 		$a->get_IP();
 		$a->get_module_name();
 		$a->command_type();
+		//$a->debug_info();
 		if($a->type===FALSE)
 			$a->error(4);
 		else
@@ -38,4 +41,7 @@ while(1)
 	else
 		$a->error(1);
 }
+
+$arduino->end();
+
 ?>

@@ -1,9 +1,9 @@
 <?php
 
-const S_PORT_NAME = '/dev/ttyACM0';
+const S_PORT_NAME = '/dev/ttyUSB0';
 const BAUD_RATE = 9600;
-const READ_REQUEST = '?\0';
-const DELAY = 50000;
+const READ_REQUEST = '?';
+const DELAY = 500000;
 const DB_SERVER = 'localhost';
 const DB_USERNAME = 'kompir';
 const DB_PASS = 'chumbedrum420';
@@ -215,6 +215,7 @@ class Comm_protocol_action
 
 	function error($code)
 	{
+		global $arduino;
 		switch($code)
 		{
 			case 1:
@@ -260,7 +261,8 @@ class Comm_protocol_action
 				$error_msg='Unknown error';
 				$code=13;
 		}
-		echo '###'.$this->IP.';E;ERROR '.$code.': '.$error_msg.';###';	//$arduino->write
+		$error_msg='###'.$this->IP.';E;ERROR '.$code.': '.$error_msg.';###';
+		$arduino->write($error_msg);
 	}
 
 	function get_module_name()
@@ -308,6 +310,15 @@ class Comm_protocol_action
 		$this->IP=$this->get_param();
 	}
 
+	function debug_info()
+	{
+		echo "\nCommand: ".$this->command;
+		echo "\nType: ".$this->type;
+		echo "\nModule: ".$this->module;
+		echo "\nIP: ".$this->IP;
+		echo "\nReply: ".$this->reply;
+	}
+
 	//Добави проверки за имена и стойности!
 }
 
@@ -330,9 +341,12 @@ class Serial
 
 	function read(&$output)
 	{
-		dio_write($this->conn, READ_REQUEST);
+		dio_write($this->conn, READ_REQUEST, 1);
 		usleep(DELAY);
-		$l=dio_read($this->conn,4);
+		$l=dio_read($this->conn, 4);
+		$l[4]="\0";
+		$l=ltrim($l, '0');
+		$l=(int)$l;
 		if($l==0)
 			return -1;
 		$output=dio_read($this->conn, $l);
@@ -341,7 +355,8 @@ class Serial
 
 	function write(&$input)
 	{
-		dio_write($this->conn, $input.'\0', strlen($input));
+		$out=$input."\0";
+		dio_write($this->conn, $out, strlen($input)+1);
 		usleep(DELAY);
 	}
 
