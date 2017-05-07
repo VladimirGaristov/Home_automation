@@ -346,7 +346,7 @@ class Serial
 		$l=dio_read($this->conn, 4);
 		$l[4]="\0";
 		$l=ltrim($l, '0');
-		$l=(int)$l;
+		$l=(int)$l;		//max 28 ?!?
 		if($l==0)
 			return -1;
 		$output=dio_read($this->conn, $l);
