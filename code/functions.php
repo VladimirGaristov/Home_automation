@@ -52,7 +52,7 @@ class Comm_protocol_action
 			$this->error(10);
 		else
 		{
-			if(preg_match(VALID_NAME, $new_module_name)==0 || strlen($new_module_name)>255)
+			if(preg_match(VALID_NAME, $new_module_name)==0 || strlen($new_module_name)>255)	//modules ne e validno ime
 			{
 				$this->error(12);
 			}
