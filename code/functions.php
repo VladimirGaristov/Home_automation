@@ -135,7 +135,7 @@ class Comm_protocol_action
 			$this->reply='###'.$this->IP.';A;';
 			do
 			{
-				if(!$this->verify_declaration($declaration, $new_var_name, $permissions))
+				if(!$this->verify_declaration($declaration, $new_var_name, $permissions))	//imeto na promenlivata da ne e po-dalgo ot 255
 				{
 					$db->query('INSERT INTO '.$this->module." (variable_name, permissions) VALUES ('".$new_var_name."', '".$permissions."');");
 					$this->reply.='Valid;';
@@ -160,7 +160,7 @@ class Comm_protocol_action
 		}
 		$new_var_name=substr($declaration, 0, $separator_position);
 		$permissions=substr($declaration, $separator_position+1);
-		if(preg_match(VALID_PERMISSIONS, $permissions)==0)
+		if(preg_match(VALID_PERMISSIONS, $permissions)==0)	//prosto proveri dali e edno ot vazmojnite
 		{
 			$this->error(9);
 			return -9;
