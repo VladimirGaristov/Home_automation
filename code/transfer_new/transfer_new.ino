@@ -2,13 +2,13 @@
 #include <WiFiUdp.h>
 #include <string.h>
 
-const char* ssid="VIVACOM";
-const char* password="22334455";
+const char* ssid="elsys-cab37";
+const char* password="elsys-bg.org";
 const int port_out=20200;
 const int port_in=20200;
 
 WiFiUDP Udp;
-char s_php[1023]="###192.168.1.9;I;ivanase;###", s_wifi[1023];
+char s_php[1023]="###192.168.1.9;I;ivanas;###", s_wifi[1023];
 int i,l;
 char ip[16];
 byte ip_bin[4];
