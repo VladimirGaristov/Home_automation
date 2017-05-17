@@ -2,14 +2,14 @@
 #include <WiFiUdp.h>
 #include <string.h>
 
-const char* ssid="elsys-cab37";
-const char* password="elsys-bg.org";
+const char* ssid="VIVACOM";
+const char* password="22334455";
 const int port_out=20200;
 const int port_in=20200;
 
 WiFiUDP Udp;
-char s_php[1023]="###192.168.1.9;I;ivanas;###", s_wifi[1023];
-int i,l;
+char s_php[1023]="###192.168.1.3;R;theboss.a;anothermodule.avariable;###", s_wifi[1023];
+int i,l, ll, j;
 char ip[16];
 byte ip_bin[4];
 int packetSize, len;
@@ -40,15 +40,41 @@ void loop()
 		if (!(strcmp(s_wifi, "?")))
 		{
 			l=strlen(s_php);
-			//if(l)
+      ll=l;
+			for(i=0;i<4;i++)
 			{
-				for(i=0;i<4;i++)
-				{
-					lenght[3-i]=l%10+48;
-					l/=10;
-				}
-				Serial.print(lenght);
-				Serial.print(s_php);
+				lenght[3-i]=l%10+48;
+				l/=10;
+			}
+		  Serial.print(lenght);
+      if(ll)
+      {
+        j=0;
+        while(ll>25)
+        {
+          while(!(Serial.available() > 0));
+          Serial.readBytesUntil('\0', s_wifi, 510);
+          s_wifi[i]='\0';
+          if(!(strcmp(s_wifi, "?")))
+          {
+            for(i=0;i<25;i++)
+            {
+              Serial.print(s_php[j*25+i]);
+            }
+            ll-=25;
+          j++;
+          }
+        }
+        while(!(Serial.available() > 0));
+        Serial.readBytesUntil('\0', s_wifi, 510);
+        s_wifi[i]='\0';
+        if(!(strcmp(s_wifi, "?")))
+        {
+          for(i=0;i<ll;i++)
+          {
+            Serial.print(s_php[j*25+i]);
+          }
+        }
 				s_php[0]='\0';
 			}
 		}

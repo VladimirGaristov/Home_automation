@@ -12,7 +12,7 @@ if($db->connect_errno)
 
 $a=new Comm_protocol_action();
 
-$attemps=3;
+$attemps=5;
 
 while(1)
 {
@@ -20,15 +20,20 @@ while(1)
 	$l=$arduino->read($a->command);
 	usleep(DELAY);
 	if($attemps==0)
+	{
 		exit(-1);
+	}
 	if($l==-1)
+	{
+		echo '<br>Nothing to read.';
 		continue;
+	}
 	if($a->verify_command())
 	{
+		echo '<br>Command: '.$a->command;
 		$a->get_IP();
 		$a->get_module_name();
 		$a->command_type();
-		//$a->debug_info();
 		if($a->type===FALSE)
 			$a->error(4);
 		else
@@ -37,6 +42,7 @@ while(1)
 			if(isset($a->reply))
 				$arduino->write($a->reply);
 		}
+		$a->debug_info();
 	}
 	else
 		$a->error(1);

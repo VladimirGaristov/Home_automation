@@ -3,7 +3,7 @@
 const S_PORT_NAME = '/dev/ttyUSB0';
 const BAUD_RATE = 9600;
 const READ_REQUEST = '?';
-const DELAY = 500000;
+const DELAY = 1000;
 const DB_SERVER = 'localhost';
 const DB_USERNAME = 'kompir';
 const DB_PASS = 'chumbedrum420';
@@ -52,7 +52,7 @@ class Comm_protocol_action
 			$this->error(10);
 		else
 		{
-			if(preg_match(VALID_NAME, $new_module_name)==0 || strlen($new_module_name)>255)	//modules ne e validno ime
+			if(preg_match(VALID_NAME, $new_module_name)==0 || strlen($new_module_name)>255)
 			{
 				$this->error(12);
 			}
@@ -135,7 +135,7 @@ class Comm_protocol_action
 			$this->reply='###'.$this->IP.';A;';
 			do
 			{
-				if(!$this->verify_declaration($declaration, $new_var_name, $permissions))	//imeto na promenlivata da ne e po-dalgo ot 255
+				if(!$this->verify_declaration($declaration, $new_var_name, $permissions))
 				{
 					$db->query('INSERT INTO '.$this->module." (variable_name, permissions) VALUES ('".$new_var_name."', '".$permissions."');");
 					$this->reply.='Valid;';
@@ -160,7 +160,7 @@ class Comm_protocol_action
 		}
 		$new_var_name=substr($declaration, 0, $separator_position);
 		$permissions=substr($declaration, $separator_position+1);
-		if(preg_match(VALID_PERMISSIONS, $permissions)==0)	//prosto proveri dali e edno ot vazmojnite
+		if(preg_match(VALID_PERMISSIONS, $permissions)==0)
 		{
 			$this->error(9);
 			return -9;
@@ -209,6 +209,8 @@ class Comm_protocol_action
 				$this->error(5);
 				return -5;
 			}
+			if(!strcmp($this->module, $owner))
+				$own=1;
 		}
 		return 0;
 	}
@@ -312,11 +314,11 @@ class Comm_protocol_action
 
 	function debug_info()
 	{
-		echo "\nCommand: ".$this->command;
-		echo "\nType: ".$this->type;
-		echo "\nModule: ".$this->module;
-		echo "\nIP: ".$this->IP;
-		echo "\nReply: ".$this->reply;
+		echo '<br>Type: '.$this->type;
+		echo '<br>Module: '.$this->module;
+		echo '<br>IP: '.$this->IP;
+		echo '<br>Reply: '.$this->reply;
+		echo '<br>';
 	}
 
 	//Добави проверки за имена и стойности!
@@ -331,7 +333,6 @@ class Serial
 		$ser_port_opt=array('baud'=>BAUD_RATE, 'bits'=>8, 'stop'=>1, 'parity'=>0);
 		$this->conn=dio_open(S_PORT_NAME, O_RDWR);
 		dio_tcsetattr($this->conn, $ser_port_opt);
-		//usleep(2000);
 	}
 
 	function end()
@@ -344,13 +345,31 @@ class Serial
 		dio_write($this->conn, READ_REQUEST, 1);
 		usleep(DELAY);
 		$l=dio_read($this->conn, 4);
-		$l[4]="\0";
+		//$l[4]="\0";
 		$l=ltrim($l, '0');
-		$l=(int)$l;		//max 28 ?!?
+		$l=(int)$l;
 		if($l==0)
 			return -1;
-		$output=dio_read($this->conn, $l);
-		return $l;
+		$output="";
+		$ll=$l;
+		dio_write($this->conn, READ_REQUEST, 1);
+		usleep(DELAY);
+		while($l>25)
+		{
+			//echo '<br>l='.$l.'<br>';
+			$buffer=dio_read($this->conn, 25);
+			//$buffer[25]="\0";
+			//echo '<br>'.$buffer.'<br>';
+			$output.=$buffer;
+			$l-=25;
+			dio_write($this->conn, READ_REQUEST, 1);
+			usleep(DELAY);
+		}
+		//echo '<br>l='.$l.'<br>';
+		$buffer=dio_read($this->conn, $l);
+		//echo '<br>'.$buffer.'<br>';
+		$output.=$buffer;
+		return $ll;
 	}
 
 	function write(&$input)
