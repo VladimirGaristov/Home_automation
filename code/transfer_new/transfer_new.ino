@@ -8,7 +8,7 @@ const int port_out=20200;
 const int port_in=20200;
 
 WiFiUDP Udp;
-char s_php[1023]="###192.168.1.3;R;theboss.a;anothermodule.avariable;###", s_wifi[1023];
+char s_php[1023]="###192.168.1.5;W;theboss.a=koche;anothermodule.avariable;###", s_wifi[1023];
 int i,l, ll, j;
 char ip[16];
 byte ip_bin[4];
@@ -18,6 +18,7 @@ char lenght[4];
 void setup()
 {
 	Serial.begin(9600);
+  Serial.setTimeout(50);
 	Serial.println();
 	Serial.printf("Connecting to %s ", ssid);
 	WiFi.begin(ssid, password);
@@ -40,41 +41,41 @@ void loop()
 		if (!(strcmp(s_wifi, "?")))
 		{
 			l=strlen(s_php);
-      ll=l;
+			ll=l;
 			for(i=0;i<4;i++)
 			{
 				lenght[3-i]=l%10+48;
 				l/=10;
 			}
-		  Serial.print(lenght);
-      if(ll)
-      {
-        j=0;
-        while(ll>25)
-        {
-          while(!(Serial.available() > 0));
-          Serial.readBytesUntil('\0', s_wifi, 510);
-          s_wifi[i]='\0';
-          if(!(strcmp(s_wifi, "?")))
-          {
-            for(i=0;i<25;i++)
-            {
-              Serial.print(s_php[j*25+i]);
-            }
-            ll-=25;
-          j++;
-          }
-        }
-        while(!(Serial.available() > 0));
-        Serial.readBytesUntil('\0', s_wifi, 510);
-        s_wifi[i]='\0';
-        if(!(strcmp(s_wifi, "?")))
-        {
-          for(i=0;i<ll;i++)
-          {
-            Serial.print(s_php[j*25+i]);
-          }
-        }
+			Serial.print(lenght);
+			if(ll)
+			{
+				j=0;
+				while(ll>25)
+				{
+					while(!(Serial.available() > 0));
+					i=Serial.readBytesUntil('\0', s_wifi, 510);
+					s_wifi[i]='\0';
+					if(!(strcmp(s_wifi, "?")))
+					{
+						for(i=0;i<25;i++)
+						{
+							Serial.print(s_php[j*25+i]);
+						}
+						ll-=25;
+				  		j++;
+					}
+				}
+				while(!(Serial.available() > 0));
+				Serial.readBytesUntil('\0', s_wifi, 510);
+				s_wifi[i]='\0';
+				if(!(strcmp(s_wifi, "?")))
+				{
+					for(i=0;i<ll;i++)
+					{
+						Serial.print(s_php[j*25+i]);
+					}
+				}
 				s_php[0]='\0';
 			}
 		}
@@ -88,7 +89,7 @@ void loop()
 			Udp.beginPacket(ip, port_out);
 			Udp.write(s_wifi, strlen(s_wifi));
 			Udp.endPacket();
-      s_php[0]='\0';
+			s_php[0]='\0';
 		}
 	}
 	packetSize = Udp.parsePacket();

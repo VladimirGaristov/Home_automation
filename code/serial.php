@@ -16,7 +16,7 @@ $attemps=5;
 
 while(1)
 {
-	$attemps--;
+	//$attemps--;
 	$l=$arduino->read($a->command);
 	usleep(DELAY);
 	if($attemps==0)

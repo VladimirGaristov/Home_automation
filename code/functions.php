@@ -9,7 +9,7 @@ const DB_USERNAME = 'kompir';
 const DB_PASS = 'chumbedrum420';
 const DB_NAME = 'home_automation';
 const VALID_NAME = '([a-zA-Z][a-zA-Z0-9]*)';
-const VALID_PERMISSIONS = '([RWN(RW)])';
+const SERVER_IP = '192.168.1.3';
 
 class Comm_protocol_action
 {
@@ -44,7 +44,7 @@ class Comm_protocol_action
 		$this->type=$t;
 	}
 
-	function new_module()	//да няма модули с еднакви адреси!
+	function new_module()
 	{
 		global $db;
 		$new_module_name=$this->get_param();
@@ -52,7 +52,7 @@ class Comm_protocol_action
 			$this->error(10);
 		else
 		{
-			if(preg_match(VALID_NAME, $new_module_name)==0 || strlen($new_module_name)>255)
+			if(!preg_match(VALID_NAME, $new_module_name) || strlen($new_module_name)>255 || !strcmp($new_module_name, "modules"))
 			{
 				$this->error(12);
 			}
@@ -74,12 +74,29 @@ class Comm_protocol_action
 	function db_write()
 	{
 		global $db;
-		/*
-		1 parse
-		2 check if exists
-		3 check permissions
-		4 write
-		*/
+		$var_name;
+		$owner;
+		$new_value;
+		$bytes_written=0;
+		$write_req=$this->get_param();
+		if($write_req===-1)
+			$this->error(10);
+		else
+		{
+			$this->reply='###'.$this->IP.';S;';
+			do
+			{
+				$own=0;
+				if(!$this->verify_write($write_req, $var_name, $owner, $new_value))
+				{
+					$db->query('UPDATE '.$owner." SET value='".$new_value."' WHERE variable_name='".$var_name."';");
+					$bytes_written+=strlen($new_value);
+				}
+				$write_req=$this->get_param();
+			}
+			while(!($write_req===-1));
+			$this->reply.=(string)$bytes_written.';###';
+		}
 	}
 
 	function db_read()
@@ -97,7 +114,7 @@ class Comm_protocol_action
 			$this->reply='###'.$this->IP.';A;';
 			do
 			{
-				$own=0;
+				$own=FALSE;
 				if(!$this->verify_read($read_req, $var_name, $owner, $own))
 				{
 					$reply=$db->query('SELECT value, permissions FROM '.$owner." WHERE variable_name='".$var_name."';");
@@ -160,7 +177,7 @@ class Comm_protocol_action
 		}
 		$new_var_name=substr($declaration, 0, $separator_position);
 		$permissions=substr($declaration, $separator_position+1);
-		if(preg_match(VALID_PERMISSIONS, $permissions)==0)
+		if(strcmp($permissions, "R") && strcmp($permissions, "W") && strcmp($permissions, "RW") && strcmp($permissions, "N"))
 		{
 			$this->error(9);
 			return -9;
@@ -192,7 +209,7 @@ class Comm_protocol_action
 		{
 			$var_name=$read_req;
 			$owner=$this->module;
-			$own=1;
+			$own=TRUE;
 			if(!isset($this->module))
 			{
 				$this->error(14);
@@ -210,9 +227,66 @@ class Comm_protocol_action
 				return -5;
 			}
 			if(!strcmp($this->module, $owner))
-				$own=1;
+				$own=TRUE;
 		}
 		return 0;
+	}
+
+	function verify_write(&$write_req, &$var_name, &$owner, &$new_value)
+	{
+		global $db;
+		$own=FALSE;
+		$separator_position=strpos($write_req, '.');
+		if($separator_position===FALSE)
+		{
+			if(!isset($this->module))
+			{
+				$this->error(14);
+				return -14;
+			}
+			$owner=$this->module;
+			$own=TRUE;
+			$var_name=strstr($write_req, "=", TRUE);
+			if($var_name===FALSE)
+			{
+				$this->error(2);
+				return -2;
+			}
+			$assignement_position=strpos($write_req, '=');
+			$new_value=substr($write_req, $assignement_position+1);
+		}
+		else
+		{
+			$owner=strstr($write_req, ".", TRUE);
+			if(!strcmp($this->module, $owner))
+				$own=TRUE;
+			$assignement_position=strpos($write_req, "=");
+			$var_name=substr($write_req, $separator_position+1, $assignement_position-$separator_position-1);
+			$new_value=substr($write_req, $assignement_position+1);
+		}
+		if(!$own)
+		{
+			$modules_with_this_name=$db->query("SELECT id FROM modules WHERE name='".$owner."';");
+			if(!$modules_with_this_name->num_rows)
+			{
+				$this->error(5);
+				return -5;
+			}
+		}
+		$reply=$db->query('SELECT permissions FROM '.$owner." WHERE variable_name='".$var_name."';");
+		if($reply->num_rows==0)
+		{
+			$this->error(6);
+			return -6;
+		}
+		$permissions=$reply->fetch_assoc();
+		if($own || strpos($permissions['permissions'], 'W'))
+			return 0;
+		else
+		{
+			$this->error(3);
+			return -3;
+		}
 	}
 
 	function error($code)
@@ -257,7 +331,7 @@ class Comm_protocol_action
 				$error_msg='Invalid module name';
 				break;
 			case 14:
-				$error_msg='Unrecognized modle';
+				$error_msg='Unrecognized module';
 				break;
 			default:
 				$error_msg='Unknown error';
@@ -280,7 +354,7 @@ class Comm_protocol_action
 
 	function send_IP()
 	{
-		$this->reply='###'.$this->IP.';H;'.$_SERVER['SERVER_ADDR'].';###';
+		$this->reply='###'.$this->IP.';H;'.SERVER_IP.';###';
 	}
 
 	function get_param()
